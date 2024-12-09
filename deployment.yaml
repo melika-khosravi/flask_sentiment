@@ -15,15 +15,15 @@ spec:
         app: flask-sentiment
     spec:
       containers:
-      - name: flask-sentiment
-        image: your-dockerhub-username/flask_sentiment:latest
-        ports:
-        - containerPort: 5000
-        resources:
-          requests:
-            cpu: 250m
-            memory: 128Mi
-          limits:
-            cpu: 500m
-            memory: 256Mi
+        - name: flask-sentiment
+          image: ${{ secrets.DOCKER_USERNAME }}/flask-vader-sentiment:latest
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              cpu: 250m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
 

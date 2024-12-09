@@ -13,40 +13,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the code
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Set up Python environment
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: 3.9
 
-    # Install dependencies
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    # Run tests (Optional: Add test cases if applicable)
     - name: Run tests
       run: |
         echo "No tests defined yet!"
 
-    # Build Docker image
     - name: Build Docker image
       run: |
         docker build -t flask-vader-sentiment .
 
-    # Log in to Docker Hub
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Push Docker image to Docker Hub
     - name: Push Docker image
       run: |
         docker tag flask-vader-sentiment:latest ${{ secrets.DOCKER_USERNAME }}/flask-vader-sentiment:latest
@@ -57,7 +50,16 @@ jobs:
     needs: build
 
     steps:
-    - name: Deploy to server
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Kubernetes credentials
+      uses: azure/setup-kubectl@v3
+      with:
+        kubeconfig: ${{ secrets.KUBECONFIG }}
+
+    - name: Update Kubernetes Deployment
       run: |
-        echo "Deployment steps here (e.g., SSH into server, pull Docker image, and restart container)"
+        kubectl set image deployment/flask-sentiment flask-sentiment=${{ secrets.DOCKER_USERNAME }}/flask-vader-sentiment:latest
+        kubectl rollout restart deployment/flask-sentiment
 
