@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # Use a self-hosted runner with Minikube installed and configured
 
     steps:
     - name: Checkout repository
@@ -34,32 +34,27 @@ jobs:
       run: |
         docker build -t flask-vader-sentiment .
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    - name: Push Docker image
+    - name: Push Docker image to Minikube
       run: |
-        docker tag flask-vader-sentiment:latest ${{ secrets.DOCKER_USERNAME }}/flask-vader-sentiment:latest
-        docker push ${{ secrets.DOCKER_USERNAME }}/flask-vader-sentiment:latest
+        eval $(minikube docker-env) # Use Minikube's Docker daemon
+        docker tag flask-vader-sentiment flask-vader-sentiment:latest
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # Ensure Minikube is running on this runner
     needs: build
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set up Kubernetes credentials
-      uses: azure/setup-kubectl@v3
-      with:
-        kubeconfig: ${{ secrets.KUBECONFIG }}
+    - name: Ensure Minikube is running
+      run: |
+        minikube start --wait
+        minikube status
 
     - name: Update Kubernetes Deployment
       run: |
-        kubectl set image deployment/flask-sentiment flask-sentiment=${{ secrets.DOCKER_USERNAME }}/flask-vader-sentiment:latest
+        kubectl apply -f k8s/deployment.yaml # Ensure you have a deployment manifest
+        kubectl set image deployment/flask-sentiment flask-sentiment=flask-vader-sentiment:latest
         kubectl rollout restart deployment/flask-sentiment
 
