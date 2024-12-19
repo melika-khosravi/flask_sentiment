@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: flask-sentiment
-          image: ${{ secrets.DOCKER_USERNAME }}/flask-vader-sentiment:latest
+          image: melikakhosravi/flask-vader-sentiment:latest
           ports:
             - containerPort: 5000
           resources:

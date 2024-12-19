@@ -1,8 +1,12 @@
 from flask import Flask , redirect, url_for , render_template , request
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import json
+from prometheus_flask_exporter import PrometheusMetrics
+
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
+
 
 @app.route("/")
 def home():

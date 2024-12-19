@@ -3,10 +3,11 @@ kind: Service
 metadata:
   name: sentiment-service
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: flask-sentiment
   ports:
   - protocol: TCP
     port: 80
     targetPort: 5000
+    nodePort: 30100
